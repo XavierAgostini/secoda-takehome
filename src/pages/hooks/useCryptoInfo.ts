@@ -7,6 +7,8 @@ interface UseCryptoInfoOutput {
   cryptoListInfo: CryptoItem[];
 }
 
+const ONE_MINUTE_IN_MS = 60 * 1000
+
 export const useCryptoInfo = (): UseCryptoInfoOutput => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [lastSyncedAt, setLastSyncedAt] = useState<string>('')
@@ -24,7 +26,7 @@ export const useCryptoInfo = (): UseCryptoInfoOutput => {
   useEffect(function refetchDataEveryMinute() {
     const interval = setInterval(() => {
       fetchData()
-    }, 60 * 1000)
+    }, ONE_MINUTE_IN_MS)
     return () => clearInterval(interval)
   }, [])
 

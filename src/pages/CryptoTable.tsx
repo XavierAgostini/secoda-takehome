@@ -1,5 +1,6 @@
 'use client'
-
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 import { Table } from '@mantine/core';
 import Icon from './components/Icon';
 import { useCryptoInfo } from "./hooks/useCryptoInfo";
@@ -39,29 +40,47 @@ const VolumeItem = ({ volume, price, symbol }: { volume: number; price: number; 
   )
 }
 
+const TableFields = [
+  '#', 'Name', 'Price', '1h %', '24h %', '7d %', 'Market Cap', 'Volume (24h)', 'Circulating Supply'
+]
 export default function CryptoTable() {
   const { isLoading, cryptoListInfo, lastSyncedAt } = useCryptoInfo()
-  console.log('isLoading',isLoading)
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <Table>
+        <thead>
+          <tr>
+            { 
+              TableFields.map((field) => (
+                <th key={field}>{field}</th>
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody>
+          {Array(10).fill(0).map((_, index) => (
+            <tr key={index} className="">
+              {Array(TableFields.length).fill(0).map((_, index) => (
+                <td key={index}><Skeleton /></td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    )
   }
 
   return (
     <div>
-      <h1>Crypto Table</h1>
       <p>Last synced at: {lastSyncedAt}</p>
       <Table>
         <thead>
           <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>1h %</th>
-            <th>24h %</th>
-            <th>7d %</th>
-            <th>Market Cap</th>
-            <th>Volume (24h)</th>
-            <th>Circulating Supply</th>
+            { 
+              TableFields.map((field) => (
+                <th key={field}>{field}</th>
+              ))
+            }
           </tr>
         </thead>
         <tbody>
