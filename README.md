@@ -1,3 +1,5 @@
+<img width="1183" alt="image" src="https://user-images.githubusercontent.com/7476817/235392375-de3c589e-2dba-41c0-8d09-dc83627d60a7.png">
+
 # Top 10 Cryptocurrency App
 This app fetches the current Top 10 Cryptocurrencies and displays their details in a user friendly table. Every 60 seconds the data is refetched. Click on any column to sort in descending or ascending order. Click on the crypto coin name to go to the CoinMarketCap page for more detailed information on the crypto currency.
 
