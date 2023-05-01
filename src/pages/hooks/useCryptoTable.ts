@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { CryptoItem } from '../types';
 
 interface useCryptoTableOutput {
+  error: string;
   lastSyncedAt: string;
   isLoading: boolean;
   cryptoListInfo: CryptoItem[];
@@ -26,17 +27,28 @@ const TABLE_FIELDS = [
 
 export const useCryptoTable = (): useCryptoTableOutput => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string>("")
   const [lastSyncedAt, setLastSyncedAt] = useState<string>('')
   const [cryptoListInfo, setCryptoListInfo] = useState<CryptoItem[]>([])
   const [sortConfig, setSortConfig] = useState<{ sortKey: string; isDesc: boolean } | null>(null)
 
   const fetchData = async () => {
-    setIsLoading(true)
-    const response = await fetch('/api/crypto')
-    const data = await response.json()
-    setLastSyncedAt(new Date().toLocaleTimeString())
-    setIsLoading(false)
-    setCryptoListInfo(data)
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/crypto')
+      const data = await response.json()
+  
+      setLastSyncedAt(new Date().toLocaleTimeString())
+      setIsLoading(false)
+      setCryptoListInfo(data)
+      setError("")
+    } catch (error) {
+      console.error('Error fetching crypto data', error)
+      setError("Opps, something went wrong! Please try again later.")
+    } finally {
+      setIsLoading(false)
+    }
+   
   }
 
   const handleSort = (key: string) => {
@@ -109,6 +121,7 @@ export const useCryptoTable = (): useCryptoTableOutput => {
       
  
   return {
+    error,
     lastSyncedAt,
     isLoading,
     cryptoListInfo: sortedCryptoListInfo,

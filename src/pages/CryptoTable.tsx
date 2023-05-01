@@ -43,8 +43,8 @@ const VolumeItem = ({ volume, price, symbol }: { volume: number; price: number; 
 
 
 export default function CryptoTable() {
-  const { isLoading, cryptoListInfo, lastSyncedAt, tableFields, sortConfig, handleSort } = useCryptoTable()
-  if (isLoading && !cryptoListInfo.length) {
+  const { isLoading, cryptoListInfo, error, lastSyncedAt, tableFields, sortConfig, handleSort } = useCryptoTable()
+  if (isLoading && !cryptoListInfo.length || error) {
     return (
       <Table>
         <thead>
@@ -65,6 +65,9 @@ export default function CryptoTable() {
             </tr>
           ))}
         </tbody>
+        <caption>
+          {error ? <p className='text-red-700 border-2 border-red-500 w-fit px-4 py-2'>{error}</p> : 'Loading...'}
+        </caption>
       </Table>
     )
   }
@@ -92,7 +95,7 @@ export default function CryptoTable() {
             <td>{coin.cmc_rank}</td>
             <td>
               <Link href={`https://coinmarketcap.com/currencies/${coin.slug}`} target="_blank">
-                <div className="inline-flex gap-1">
+                <div className="inline-flex gap-2 items-center">
                 <Icon name={coin.slug} />
                 <strong>{coin.name}</strong>
                 <span className="text-gray-500">({coin.symbol})</span>
