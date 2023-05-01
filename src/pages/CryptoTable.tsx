@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react"
-import { CryptoItem } from "./types"
+'use client'
+
 import { Table } from '@mantine/core';
 import Icon from './components/Icon';
+import { useCryptoInfo } from "./hooks/useCryptoInfo";
 
 const { format: currencyFormatter} = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -17,7 +18,7 @@ const PercentItem = ({ value }: { value: number }) => {
   const percentStr = `${value.toFixed(2)}%`.replace('-', '')
   return (
     <div className="flex items-center">
-      <Icon name={isPositive ? 'arrow-up' : 'arrow-down'} color={isPositive ? 'green' : 'red'} size={12}/>
+      <Icon name={isPositive ? 'arrow-up' : 'arrow-down'} color={color} size={12}/>
       <span className={textColor}>
         {percentStr}
       </span>
@@ -39,20 +40,8 @@ const VolumeItem = ({ volume, price, symbol }: { volume: number; price: number; 
 }
 
 export default function CryptoTable() {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [cryptoListInfo, setCryptoListInfo] = useState<CryptoItem[]>([])
-
-  const fetchData = async () => {
-    setIsLoading(true)
-    const response = await fetch('/api/crypto')
-    const data = await response.json()
-    setIsLoading(false)
-    setCryptoListInfo(data)
-  }
-  useEffect(function initializeTable() {
-    fetchData()
-  }, [])
-   
+  const { isLoading, cryptoListInfo, lastSyncedAt } = useCryptoInfo()
+  console.log('isLoading',isLoading)
   if (isLoading) {
     return <div>Loading...</div>
   }
@@ -60,6 +49,7 @@ export default function CryptoTable() {
   return (
     <div>
       <h1>Crypto Table</h1>
+      <p>Last synced at: {lastSyncedAt}</p>
       <Table>
         <thead>
           <tr>
