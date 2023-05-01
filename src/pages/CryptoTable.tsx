@@ -3,7 +3,8 @@ import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { Table } from '@mantine/core';
 import Icon from './components/Icon';
-import { useCryptoInfo } from "./hooks/useCryptoInfo";
+import { useCryptoTable } from "./hooks/useCryptoTable";
+import Link from 'next/link';
 
 const { format: currencyFormatter} = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -40,19 +41,17 @@ const VolumeItem = ({ volume, price, symbol }: { volume: number; price: number; 
   )
 }
 
-const TableFields = [
-  '#', 'Name', 'Price', '1h %', '24h %', '7d %', 'Market Cap', 'Volume (24h)', 'Circulating Supply'
-]
+
 export default function CryptoTable() {
-  const { isLoading, cryptoListInfo, lastSyncedAt } = useCryptoInfo()
-  if (isLoading) {
+  const { isLoading, cryptoListInfo, lastSyncedAt, tableFields, sortConfig, handleSort } = useCryptoTable()
+  if (isLoading && !cryptoListInfo.length) {
     return (
       <Table>
         <thead>
           <tr>
             { 
-              TableFields.map((field) => (
-                <th key={field}>{field}</th>
+              tableFields.map(({ id, name }) => (
+                <th key={id}>{name}</th>
               ))
             }
           </tr>
@@ -60,7 +59,7 @@ export default function CryptoTable() {
         <tbody>
           {Array(10).fill(0).map((_, index) => (
             <tr key={index} className="">
-              {Array(TableFields.length).fill(0).map((_, index) => (
+              {Array(tableFields.length).fill(0).map((_, index) => (
                 <td key={index}><Skeleton /></td>
               ))}
             </tr>
@@ -71,52 +70,60 @@ export default function CryptoTable() {
   }
 
   return (
-    <div>
-      <p>Last synced at: {lastSyncedAt}</p>
-      <Table>
-        <thead>
-          <tr>
-            { 
-              TableFields.map((field) => (
-                <th key={field}>{field}</th>
-              ))
-            }
-          </tr>
-        </thead>
-        <tbody>
-          {cryptoListInfo.map((coin: any) => (
-            <tr key={coin.id} className="">
-              <td>{coin.cmc_rank}</td>
-              <td>
+    <Table highlightOnHover horizontalSpacing='md'>
+      <thead>
+        <tr>
+          { 
+            tableFields.map(({ id, name }) => (
+              <th key={id} onClick={() => handleSort(id)}>
+                <div className={`flex items-center gap-2 cursor-pointer ${id == '24h' || id == '7d' ? 'min-w-[66px]': 'min-w-fit'}`}>
+                  <span>{name}</span>
+                  {sortConfig?.sortKey === id ? (
+                    <Icon name={sortConfig.isDesc? 'arrow-up' : 'arrow-down'} size={12} />) : <div style={{width: 12, height: 12, background: 'transparent'}}/>}
+                </div>
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {cryptoListInfo.map((coin: any) => (
+          <tr key={coin.id} className="">
+            <td>{coin.cmc_rank}</td>
+            <td>
+              <Link href={`https://coinmarketcap.com/currencies/${coin.slug}`} target="_blank">
                 <div className="inline-flex gap-1">
                 <Icon name={coin.slug} />
                 <strong>{coin.name}</strong>
                 <span className="text-gray-500">({coin.symbol})</span>
                 </div>
-              </td>
-              <td>{currencyFormatter(coin.quote.USD.price)}</td>
-              <td>
-                <PercentItem value={coin.quote.USD.percent_change_1h} />
-              </td>
-              <td>
-                <PercentItem value={coin.quote.USD.percent_change_24h} />
-              </td>
-              <td>
-                <PercentItem value={coin.quote.USD.percent_change_24h} />
-              </td>
-              <td>{currencyFormatter(coin.quote.USD.market_cap)}</td>
-              <td>
-                <VolumeItem volume={coin.quote.USD.volume_24h} price={coin.quote.USD.price} symbol={coin.symbol} />
-                
-              </td>
-              <td className="flex gap-1">
-                {coin.circulating_supply.toLocaleString()}
-                <span>{coin.symbol}</span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </div>
+              </Link>
+            </td>
+            <td>{currencyFormatter(coin.quote.USD.price)}</td>
+            <td>
+              <PercentItem value={coin.quote.USD.percent_change_1h} />
+            </td>
+            <td>
+              <PercentItem value={coin.quote.USD.percent_change_24h} />
+            </td>
+            <td>
+              <PercentItem value={coin.quote.USD.percent_change_7d} />
+            </td>
+            <td>{currencyFormatter(coin.quote.USD.market_cap)}</td>
+            <td>
+              <VolumeItem volume={coin.quote.USD.volume_24h} price={coin.quote.USD.price} symbol={coin.symbol} />
+              
+            </td>
+            <td className="flex gap-1">
+              {coin.circulating_supply.toLocaleString()}
+              <span>{coin.symbol}</span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+      <caption>
+        <p>Last synced at: {lastSyncedAt}</p>
+      </caption>
+    </Table>
   )
 }
