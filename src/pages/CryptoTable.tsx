@@ -25,6 +25,19 @@ const PercentItem = ({ value }: { value: number }) => {
   )
 }
 
+const VolumeItem = ({ volume, price, symbol }: { volume: number; price: number; symbol: string}) => {
+  const volumeValue = currencyFormatter(volume)
+  const volumeCoinQuantity = (Number((volume / price).toFixed(0))).toLocaleString()
+  return (
+    <div className="flex flex-col">
+      {volumeValue}
+      <span className="text-gray-500">
+        {volumeCoinQuantity} {symbol}
+      </span>
+    </div>
+  )
+}
+
 export default function CryptoTable() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [cryptoListInfo, setCryptoListInfo] = useState<CryptoItem[]>([])
@@ -65,10 +78,12 @@ export default function CryptoTable() {
           {cryptoListInfo.map((coin: any) => (
             <tr key={coin.id} className="">
               <td>{coin.cmc_rank}</td>
-              <td className="flex gap-2">
+              <td>
+                <div className="inline-flex gap-1">
                 <Icon name={coin.slug} />
                 <strong>{coin.name}</strong>
                 <span className="text-gray-500">({coin.symbol})</span>
+                </div>
               </td>
               <td>{currencyFormatter(coin.quote.USD.price)}</td>
               <td>
@@ -81,8 +96,14 @@ export default function CryptoTable() {
                 <PercentItem value={coin.quote.USD.percent_change_24h} />
               </td>
               <td>{currencyFormatter(coin.quote.USD.market_cap)}</td>
-              <td>{currencyFormatter(coin.quote.USD.volume_24h)}</td>
-              <td>{coin.circulating_supply}</td>
+              <td>
+                <VolumeItem volume={coin.quote.USD.volume_24h} price={coin.quote.USD.price} symbol={coin.symbol} />
+                
+              </td>
+              <td className="flex gap-1">
+                {coin.circulating_supply.toLocaleString()}
+                <span>{coin.symbol}</span>
+              </td>
             </tr>
           ))}
         </tbody>
